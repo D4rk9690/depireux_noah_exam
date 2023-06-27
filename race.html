@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Horse Racing Game</title>
+  <style>
+    /* CSS styles for horse representation */
+    .horse {
+      width: 50px;
+      height: 50px;
+      border: 2px solid black;
+      margin-bottom: 5px;
+    }
+    /* CSS styles for selected horse */
+    .selected {
+      border-color: red;
+    }
+    /* CSS styles for popup */
+    .popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: #fff;
+      padding: 20px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>Horse Racing Game</h1>
+
+  <!-- Display the horses -->
+  <div id="horseContainer">
+    <!-- Generate 8 horse elements dynamically -->
+  </div>
+
+  <button id="startRaceBtn">Start Race</button>
+
+  <!-- Popup for betting -->
+  <div id="betPopup" class="popup">
+    <label for="betAmount">Enter Bet Amount:</label>
+    <input type="number" id="betAmount" min="0" required>
+    <button id="confirmBetBtn">Confirm Bet</button>
+  </div>
+
+  <!-- Message display area -->
+  <div id="message"></div>
+
+  <script>
+    // Global variables
+    let selectedHorse = null; // Track the selected horse
+    let raceResult = null; // Store the race result
+
+    // Function to create the horse elements dynamically
+    function createHorses() {
+      const horseContainer = document.getElementById("horseContainer");
+      for (let i = 1; i <= 8; i++) {
+        const horse = document.createElement("div");
+        horse.className = "horse";
+        horse.textContent = i; // Use numbers as horse representation
+        horseContainer.appendChild(horse);
+        horse.addEventListener("click", horseClickHandler); // Attach click event listener to each horse
+      }
+    }
+
+    // Event handler for horse click
+    function horseClickHandler() {
+      // Deselect previously selected horse
+      if (selectedHorse !== null) {
+        selectedHorse.classList.remove("selected");
+      }
+
+      // Select the clicked horse
+      if (selectedHorse !== this) {
+        this.classList.add("selected");
+        selectedHorse = this;
+      } else {
+        selectedHorse = null;
+      }
+    }
+
+    // Event handler for bet confirmation
+    function confirmBetHandler() {
+      const betAmount = parseInt(document.getElementById("betAmount").value);
+      if (betAmount >= 0 && betAmount <= 100) {
+        // Send the bet amount and selected horse to the backend
+        // Perform validation, processing, and response handling on the backend
+        // Update the frontend with the race result and handle further actions
+        // (e.g., displaying the race animation, updating the account balance, etc.)
+        console.log("Bet Amount:", betAmount);
+        console.log("Selected Horse:", selectedHorse.textContent);
+
+        // Disable the bet popup
+        document.getElementById("betPopup").style.display = "none";
+
+        // Show the race animation
+        const horses = document.getElementsByClassName("horse");
+        const raceDuration = 5000; // 5 seconds
+        const distance = window.innerWidth - 10; // Race distance based on window width
+
+        // Randomize horse speeds
+        const speeds = [];
+        for (let i = 0; i < horses.length; i++) {
+          speeds[i] = Math.floor(Math.random() * 3) + 1; // Random speed between 1 and 3
+        }
+
+        // Calculate the time interval for each frame
+        const interval = raceDuration / distance;
+
+        // Start the race animation
+        const startTime = Date.now();
+        const raceInterval = setInterval(() => {
+          const elapsedTime = Date.now() - startTime;
+
+          // Update horse positions based on elapsed time and speeds
+          for (let i = 0; i < horses.length; i++) {
+            const horse = horses[i];
+            const position = (elapsedTime / interval) * speeds[i];
+            horse.style.marginLeft = position + "px";
+          }
+
+          // Check if the race is completed
+          if (elapsedTime >= raceDuration) {
+            clearInterval(raceInterval);
+
+            // Simulate the race result
+            const randomPosition = Math.floor(Math.random() * 8) + 1;
+            raceResult = randomPosition === parseInt(selectedHorse.textContent);
+
+            console.log("Race Result:", raceResult);
+
+            // Display the race result notification
+            const messageElement = document.getElementById("message");
+            if (raceResult) {
+              messageElement.textContent = "Congratulations! You won the race!";
+            } else {
+              messageElement.textContent = "Oops! Better luck next time.";
+            }
+
+            // Show the message for a few seconds and reset the race
+            setTimeout(() => {
+              messageElement.textContent = "";
+              resetRace();
+            }, 3000);
+          }
+        }, 10); // Adjust the interval for smoother animation
+      } else {
+        alert("Please enter a valid bet amount (between 0 and 100).");
+      }
+    }
+
+    // Function to reset the race
+    function resetRace() {
+      const horses = document.getElementsByClassName("horse");
+      for (let i = 0; i < horses.length; i++) {
+        const horse = horses[i];
+        horse.style.marginLeft = "0";
+      }
+
+      // Clear the selected horse
+      if (selectedHorse !== null) {
+        selectedHorse.classList.remove("selected");
+        selectedHorse = null;
+      }
+
+      // Clear the bet amount
+      document.getElementById("betAmount").value = "";
+    }
+
+    // Event handler for starting the race
+    function startRaceHandler() {
+      // Disable the race button to prevent multiple clicks
+      document.getElementById("startRaceBtn").disabled = true;
+
+      // Show the bet popup
+      document.getElementById("betPopup").style.display = "block";
+    }
+
+    // Attach event listeners
+    document.addEventListener("DOMContentLoaded", createHorses);
+
+    document.getElementById("confirmBetBtn").addEventListener("click", confirmBetHandler);
+    document.getElementById("startRaceBtn").addEventListener("click", startRaceHandler);
+  </script>
+</body>
+</html>

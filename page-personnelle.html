@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Page Personnelle</title>
+</head>
+<body>
+  <h2 id="welcomeMessage"></h2>
+  <p id="totalCredits"></p>
+
+  <button id="logoutBtn">Deconnexion</button>
+  <button id="changePasswordBtn">Modifier le mot de passe</button>
+  <button id="addCreditsBtn">Ajouter des credits</button>
+
+  <div id="addCreditsModal" style="display: none;">
+    <label for="creditInput">Nombre de credits :</label>
+    <input type="number" id="creditInput" min="0" max="100" required>
+    <br>
+    <button id="confirmCreditBtn">Ajouter des credits</button>
+    <button id="cancelCreditBtn">Annuler</button>
+  </div>
+
+  <a href="./race.html"> Allez a la course</a>
+
+  <script>
+    // Function to make an AJAX request and update the user information on the page
+    function getUserInfo() {
+      var xhr = new XMLHttpRequest();
+      xhr.open("GET", "./backend/userinfo.php", true);
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+          var response = JSON.parse(xhr.responseText);
+          if (response.status === "success") {
+            var user = response.data;
+            document.getElementById("welcomeMessage").textContent = "Bienvenue, " + user.firstname + " " + user.username;
+            document.getElementById("totalCredits").textContent = "Total des credits disponibles : " + user.credits;
+          } else {
+            // Handle error response
+            alert(response.message);
+          }
+        }
+      };
+      xhr.send();
+    }
+
+    // Call the getUserInfo() function when the page loads
+    window.addEventListener("load", getUserInfo);
+
+    // Logout button click event handler
+    document.getElementById("logoutBtn").addEventListener("click", function() {
+      var xhr = new XMLHttpRequest();
+      xhr.open("POST", "logout.php", true);
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+          window.location.href = "index.html";
+        }
+      };
+      xhr.send();
+    });
+
+    // Change password button click event handler
+    document.getElementById("changePasswordBtn").addEventListener("click", function() {
+      // Open a modal or popup to handle password change logic
+      // Your code here to display the modal and handle client-side logic
+      alert("Implement password change logic here");
+    });
+
+    // Add credits button click event handler
+    document.getElementById("addCreditsBtn").addEventListener("click", function() {
+      // Display the add credits modal
+      document.getElementById("addCreditsModal").style.display = "block";
+    });
+
+    // Confirm add credits button click event handler
+    document.getElementById("confirmCreditBtn").addEventListener("click", function() {
+      var credits = parseInt(document.getElementById("creditInput").value);
+      if (credits >= 0 && credits <= 100) {
+        // Display a confirmation dialog
+        var confirmation = confirm("Are you sure you want to add " + credits + " credits?");
+        if (confirmation) {
+          // Perform an AJAX request to add the credits
+          var xhr = new XMLHttpRequest();
+          xhr.open("POST", "./backend/addcredits.php", true);
+          xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+          xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+              var response = JSON.parse(xhr.responseText);
+              if (response.status === "success") {
+                // Update the total credits on the page
+                document.getElementById("totalCredits").textContent = "Total des credits disponibles : " + response.data.totalCredits;
+                // Hide the add credits modal
+                document.getElementById("addCreditsModal").style.display = "none";
+              } else {
+                // Handle error response
+                alert(response.message);
+              }
+            }
+          };
+          xhr.send("credits=" + credits);
+        }
+      } else {
+        alert("Veuillez entrer un nombre de credits valide (entre 0 et 100).");
+      }
+    });
+
+    // Cancel add credits button click event handler
+    document.getElementById("cancelCreditBtn").addEventListener("click", function() {
+      // Hide the add credits modal
+      document.getElementById("addCreditsModal").style.display = "none";
+    });
+  </script>
+</body>
+</html>
